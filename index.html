@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janna Mae</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #fff0f2;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #4a4a4a;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Falling Hearts Background */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart-fall {
+            position: absolute;
+            color: #ff4d6d;
+            font-size: 20px;
+            opacity: 0.7;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Fireworks Layer */
+        #fireworks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 300px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Card Container Setup */
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.4);
+            margin: 20px auto;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+
+        .header {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        h1 {
+            color: #ff4d6d;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #aaa;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .heart-icon {
+            font-size: 50px;
+            color: #ff4d6d;
+            animation: pulse 1.5s infinite;
+            margin: 15px 0;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .heart-icon:active {
+            transform: scale(0.85);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* Pop-up Burst Hearts Animation */
+        .burst-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            z-index: 9999;
+            animation: popAndFade 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            user-select: none;
+        }
+
+        @keyframes popAndFade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.5) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot));
+            }
+        }
+
+        /* Timer Box Styling */
+        .timer-card {
+            background: #fff0f3;
+            border: 2px dashed #ffb3c1;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .timer-title {
+            font-size: 13px;
+            color: #ff4d6d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .timer-grid {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .timer-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-val {
+            font-size: 22px;
+            font-weight: bold;
+            color: #d90429;
+        }
+
+        .timer-label {
+            font-size: 11px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        /* Message Styling */
+        .message-p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #5c5c5c;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* Clickable Footer */
+        .footer-btn {
+            margin-top: 20px;
+            padding: 15px;
+            border-top: 1px dashed #ffd1dc;
+            font-size: 18px;
+            color: #ff4d6d;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 12px;
+            background: #fff0f3;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.15);
+            display: block;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .footer-btn:hover {
+            background: #ffe3e8;
+            transform: scale(1.02);
+        }
+
+        /* ================= POPUP MODAL STYLES ================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #fff0f3;
+            width: 90%;
+            max-width: 420px;
+            border-radius: 25px;
+            padding: 25px 20px 20px 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 24px;
+            color: #ff4d6d;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 20;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 3D GLOBE VIEWPORT & SPINNER */
+        .globe-viewport {
+            width: 100%;
+            height: 310px;
+            perspective: 800px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            cursor: grab;
+            user-select: none;
+            touch-action: pan-y;
+        }
+
+        .globe-viewport:active {
+            cursor: grabbing;
+        }
+
+        .globe-spinner {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* PHOTOS IN 3D SPACE */
+        .globe-photo {
+            position: absolute;
+            width: 100px;
+            height: 130px;
+            left: -50px;
+            top: -90px;
+            border-radius: 12px;
+            border: 4px solid #fff;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            object-fit: cover;
+            backface-visibility: visible;
+        }
+
+        /* 3D ROTATING TEXT CHARACTERS IN THE SAME SPINNER */
+        .globe-char {
+            position: absolute;
+            font-size: 13px;
+            font-weight: bold;
+            color: #ff4d6d;
+            left: -6px;
+            top: 70px; /* Inilagay sa mismong ibaba ng mga litrato */
+            width: 12px;
+            text-align: center;
+            user-select: none;
+            backface-visibility: visible;
+        }
+
+        .drag-instruction {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fireworks"></canvas>
+    <div class="hearts-container" id="hearts-bg"></div>
+
+    <audio id="bg-music" src="music.mp3" loop autoplay></audio>
+
+    <div class="container">
+        <div class="header">
+            <h1>Happy Monthsary!</h1>
+            <div class="subtitle">Janna Mae</div>
+            
+            <div class="heart-icon" id="interactive-heart" onclick="popHearts(event)">❤️</div>
+        </div>
+
+        <div class="timer-card">
+            <div class="timer-title">Since</div>
+            <div class="timer-grid">
+                <div class="timer-unit">
+                    <span class="timer-val" id="t-years">0</span>
+                    <span class="timer-label">Years</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-val" id="t-days">0</span>
+                    <span class="timer-label">Days</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-val" id="t-hours">00</span>
+                    <span class="timer-label">Hours</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-val" id="t-mins">00</span>
+                    <span class="timer-label">Mins</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-val" id="t-secs">00</span>
+                    <span class="timer-label">Secs</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="message-p">
+            Happy monthsary satin, mahal! Maraming salamat sa bawat araw na pinaparamdam mo sa akin kung gaano ako ka-special. Salamat sa pag-unawa, sa mga tawa, at kahit sa mga simpleng asaran natin na napipikon ka.
+        </p>
+        
+        <p class="message-p">
+             Kahit anong mangyari, lagi mong tatandaan na nandito lang ako para suportahan at mahalin ka.
+        </p>
+
+        <div class="footer-btn" onclick="openGlobeModal()">
+            I Love You, Mahal ✨
+        </div>
+    </div>
+
+    <!-- POPUP GLOBE MODAL -->
+    <div class="modal-overlay" id="globeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeGlobeModal()">&times;</span>
+            <h2 style="color: #ff4d6d; font-size: 20px; margin-bottom: 5px;">Our Precious Memories</h2>
+            
+            <!-- 3D Globe Viewport -->
+            <div class="globe-viewport" id="viewport">
+                <div class="globe-spinner" id="spinner">
+                    <!-- Photos inside 3D Globe -->
+                    <img src="photo1.jpg" class="globe-photo" alt="">
+                    <img src="photo2.jpg" class="globe-photo" alt="">
+                    <img src="photo3.jpg" class="globe-photo" alt="">
+                    <img src="photo1.jpg" class="globe-photo" alt="">
+                    <img src="photo2.jpg" class="globe-photo" alt="">
+                    <img src="photo3.jpg" class="globe-photo" alt="">
+                </div>
+            </div>
+
+            <div class="drag-instruction">Jepong Devxyz</div>
+        </div>
+    </div>
+
+    <script>
+        // --- AUTOPLAY MUSIC ENGINE ---
+        const music = document.getElementById('bg-music');
+
+        function startMusic() {
+            if (music.paused) {
+                music.play().catch(e => console.log("Autoplay waiting for interaction:", e));
+            }
+        }
+
+        window.addEventListener('load', startMusic);
+        ['click', 'touchstart', 'scroll', 'keydown'].forEach(event => {
+            document.body.addEventListener(event, startMusic, { once: true });
+        });
+
+
+        // --- INTERACTIVE POP-UP HEARTS ---
+        const popEmojis = ['❤️', '💖', '💗', '💕', '💘', '✨', '🌸'];
+
+        function popHearts(e) {
+            const rect = e.target.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 12; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('burst-heart');
+                heart.innerText = popEmojis[Math.floor(Math.random() * popEmojis.length)];
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 40;
+                const tx = Math.cos(angle) * distance + 'px';
+                const ty = Math.sin(angle) * distance - 30 + 'px';
+                const rot = (Math.random() - 0.5) * 60 + 'deg';
+
+                heart.style.left = centerX + 'px';
+                heart.style.top = centerY + 'px';
+                heart.style.setProperty('--tx', tx);
+                heart.style.setProperty('--ty', ty);
+                heart.style.setProperty('--rot', rot);
+
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 1000);
+            }
+        }
+
+
+        // --- COUNT-UP TIMER LOGIC ---
+        const anniversaryDate = new Date('2022-05-29T00:00:00');
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - anniversaryDate;
+
+            const seconds = Math.floor(diff / 1000) % 60;
+            const minutes = Math.floor(diff / (1000 * 60)) % 60;
+            const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+            const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const years = Math.floor(totalDays / 365);
+            const days = totalDays % 365;
+
+            document.getElementById('t-years').innerText = years;
+            document.getElementById('t-days').innerText = days;
+            document.getElementById('t-hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('t-mins').innerText = String(minutes).padStart(2, '0');
+            document.getElementById('t-secs').innerText = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+
+        // --- 3D GLOBE + 3D TEXT IN UNIFIED SPINNER ---
+        const modal = document.getElementById('globeModal');
+        const spinner = document.getElementById('spinner');
+        const viewport = document.getElementById('viewport');
+        const photos = document.querySelectorAll('.globe-photo');
+
+        const radius = 130;
+        const photoRadius = 130;
+        const textRadius = 125; // Radius ng text ring sa ilalim
+        const totalPhotos = photos.length;
+        let angleY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let autoRotateTimer;
+
+        // Position photos in 3D circle
+        photos.forEach((photo, index) => {
+            const phi = (index / totalPhotos) * Math.PI * 2;
+            photo.style.transform = `rotateY(${phi}rad) translateZ(${photoRadius}px)`;
+        });
+
+        // Generate 3D Circular Text under photos (kasabay ng ikot sa 3D Space)
+        const circularText = "• Janna Mae • Mahalers • I Love You! ";
+        const textChars = circularText.split('');
+        const totalChars = textChars.length;
+
+        textChars.forEach((char, index) => {
+            const charSpan = document.createElement('span');
+            charSpan.classList.add('globe-char');
+            charSpan.innerText = char === ' ' ? '\u00A0' : char;
+
+            const phi = (index / totalChars) * Math.PI * 2;
+            // Nilagyan ng rotateY at translateZ para nasa 3D ring siya kasabay ng photos
+            charSpan.style.transform = `rotateY(${phi}rad) translateZ(${textRadius}px)`;
+
+            spinner.appendChild(charSpan);
+        });
+
+        function updateSpinner() {
+            spinner.style.transform = `rotateY(${angleY}deg)`;
+        }
+
+        function startAutoRotate() {
+            autoRotateTimer = setInterval(() => {
+                if (!isDragging) {
+                    angleY += 0.5;
+                    updateSpinner();
+                }
+            }, 30);
+        }
+
+        function stopAutoRotate() {
+            clearInterval(autoRotateTimer);
+        }
+
+        function openGlobeModal() {
+            modal.classList.add('active');
+            startAutoRotate();
+        }
+
+        function closeGlobeModal() {
+            modal.classList.remove('active');
+            stopAutoRotate();
+        }
+
+        // Drag / Swipe Controls
+        function handleStart(e) {
+            isDragging = true;
+            startX = e.touches ? e.touches[0].clientX : e.clientX;
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+            const deltaX = currentX - startX;
+            angleY += deltaX * 0.5;
+            startX = currentX;
+            updateSpinner();
+        }
+
+        function handleEnd() {
+            isDragging = false;
+        }
+
+        viewport.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        viewport.addEventListener('touchstart', handleStart);
+        window.addEventListener('touchmove', handleMove);
+        window.addEventListener('touchend', handleEnd);
+
+
+        // --- FALLING HEARTS BACKGROUND ---
+        const heartsContainer = document.getElementById('hearts-bg');
+        const heartIcons = ['❤️', '💖', '💗', '💕', '💘'];
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-fall');
+            heart.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 3 + 's';
+            heart.style.fontSize = Math.random() * 15 + 15 + 'px';
+
+            heartsContainer.appendChild(heart);
+            setTimeout(() => heart.remove(), 6000);
+        }
+
+        setInterval(createHeart, 400);
+
+
+        // --- CANVAS FIREWORKS SYSTEM ---
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = 300;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let particles = [];
+
+        function Particle(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.radius = Math.random() * 2 + 1;
+            this.velocity = {
+                x: (Math.random() - 0.5) * 6,
+                y: (Math.random() - 0.5) * 6
+            };
+            this.alpha = 1;
+        }
+
+        Particle.prototype.draw = function() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.restore();
+        };
+
+        Particle.prototype.update = function() {
+            this.velocity.y += 0.05;
+            this.x += this.velocity.x;
+            this.y += this.velocity.y;
+            this.alpha -= 0.015;
+        };
+
+        function createFirework() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * (canvas.height - 100) + 50;
+            const colors = ['#ff4d6d', '#ff758f', '#ffb3c1', '#ffccd5', '#ff8fa3'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let i = 0; i < 30; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function animateFireworks() {
+            requestAnimationFrame(animateFireworks);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                if (particle.alpha <= 0) {
+                    particles.splice(index, 1);
+                } else {
+                    particle.update();
+                    particle.draw();
+                }
+            });
+        }
+
+        animateFireworks();
+        setInterval(createFirework, 1500);
+    </script>
+</body>
+</html>
