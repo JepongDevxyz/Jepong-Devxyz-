@@ -316,7 +316,7 @@
             font-weight: bold;
             color: #ff4d6d;
             left: -6px;
-            top: 70px; /* Inilagay sa mismong ibaba ng mga litrato */
+            top: 70px;
             width: 12px;
             text-align: center;
             user-select: none;
@@ -335,7 +335,7 @@
     <canvas id="fireworks"></canvas>
     <div class="hearts-container" id="hearts-bg"></div>
 
-    <audio id="bg-music" src="music.mp3" loop autoplay></audio>
+    <audio id="bg-music" src="music.mp3" loop preload="auto"></audio>
 
     <div class="container">
         <div class="header">
@@ -393,7 +393,6 @@
             <!-- 3D Globe Viewport -->
             <div class="globe-viewport" id="viewport">
                 <div class="globe-spinner" id="spinner">
-                    <!-- Photos inside 3D Globe -->
                     <img src="photo1.jpg" class="globe-photo" alt="">
                     <img src="photo2.jpg" class="globe-photo" alt="">
                     <img src="photo3.jpg" class="globe-photo" alt="">
@@ -408,18 +407,30 @@
     </div>
 
     <script>
-        // --- AUTOPLAY MUSIC ENGINE ---
+        // --- STABLE AUTOPLAY MUSIC ENGINE ---
         const music = document.getElementById('bg-music');
+        const triggerEvents = ['click', 'touchstart', 'touchend', 'scroll', 'keydown'];
 
-        function startMusic() {
-            if (music.paused) {
-                music.play().catch(e => console.log("Autoplay waiting for interaction:", e));
+        function forcePlayAudio() {
+            if (music && music.paused) {
+                music.play().then(() => {
+                    removeAudioTriggers();
+                }).catch(e => console.log("Autoplay waiting for interaction:", e));
             }
         }
 
-        window.addEventListener('load', startMusic);
-        ['click', 'touchstart', 'scroll', 'keydown'].forEach(event => {
-            document.body.addEventListener(event, startMusic, { once: true });
+        function removeAudioTriggers() {
+            triggerEvents.forEach(evt => {
+                document.removeEventListener(evt, forcePlayAudio, true);
+            });
+        }
+
+        // Subukang mag-play sa page load
+        window.addEventListener('load', forcePlayAudio);
+
+        // Capture phase listeners sa document level para sa unang interaction ng user
+        triggerEvents.forEach(evt => {
+            document.addEventListener(evt, forcePlayAudio, { once: true, capture: true });
         });
 
 
@@ -485,9 +496,8 @@
         const viewport = document.getElementById('viewport');
         const photos = document.querySelectorAll('.globe-photo');
 
-        const radius = 130;
         const photoRadius = 130;
-        const textRadius = 125; // Radius ng text ring sa ilalim
+        const textRadius = 125;
         const totalPhotos = photos.length;
         let angleY = 0;
         let isDragging = false;
@@ -500,7 +510,7 @@
             photo.style.transform = `rotateY(${phi}rad) translateZ(${photoRadius}px)`;
         });
 
-        // Generate 3D Circular Text under photos (kasabay ng ikot sa 3D Space)
+        // Generate 3D Circular Text under photos
         const circularText = "• Janna Mae • Mahalers • I Love You! ";
         const textChars = circularText.split('');
         const totalChars = textChars.length;
@@ -511,7 +521,6 @@
             charSpan.innerText = char === ' ' ? '\u00A0' : char;
 
             const phi = (index / totalChars) * Math.PI * 2;
-            // Nilagyan ng rotateY at translateZ para nasa 3D ring siya kasabay ng photos
             charSpan.style.transform = `rotateY(${phi}rad) translateZ(${textRadius}px)`;
 
             spinner.appendChild(charSpan);
